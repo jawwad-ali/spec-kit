@@ -42,6 +42,14 @@ class WorkflowDefinition:
         self.source_path = source_path
 
         workflow = data.get("workflow", {})
+        # A present-but-non-mapping ``workflow:`` block (bare ``workflow:`` ->
+        # None, or ``workflow: <str/list>``) would crash the following
+        # ``workflow.get(...)`` calls with AttributeError before validate can
+        # report the malformed shape. Normalize the local to {} (self.data
+        # keeps the raw value for validate_workflow), mirroring the
+        # default_options guard below.
+        if not isinstance(workflow, dict):
+            workflow = {}
         self.id: str = workflow.get("id", "")
         self.name: str = workflow.get("name", "")
         self.version: str = workflow.get("version", "0.0.0")
